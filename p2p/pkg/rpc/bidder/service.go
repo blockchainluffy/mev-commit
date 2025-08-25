@@ -205,6 +205,8 @@ func (s *Service) SendBid(
 			DecayEndTimestamp:   bid.DecayEndTimestamp,
 			RevertingTxHashes:   strings.Join(stripPrefix(bid.RevertingTxHashes), ","),
 			RawTransactions:     bid.RawTransactions,
+			Identity:            bid.Identity,
+			IsShutterised:       bid.IsShutterised,
 		},
 	)
 	if err != nil {
@@ -228,6 +230,8 @@ func (s *Service) SendBid(
 			DecayEndTimestamp:    b.DecayEndTimestamp,
 			DispatchTimestamp:    resp.DispatchTimestamp,
 			RevertingTxHashes:    strings.Split(b.RevertingTxHashes, ","),
+			Identity:             b.Identity,
+			IsShutterised:        b.IsShutterised,
 		})
 		if err != nil {
 			s.logger.Error("sending preConfirmation", "error", err)
@@ -800,6 +804,8 @@ LOOP:
 			SlashAmount:         c.Bid.SlashAmount,
 			DecayStartTimestamp: c.Bid.DecayStartTimestamp,
 			DecayEndTimestamp:   c.Bid.DecayEndTimestamp,
+			Identity:            c.Bid.Identity,
+			IsShutterised:       c.Bid.IsShutterised,
 			Commitments: []*bidderapiv1.GetBidInfoResponse_CommitmentWithStatus{
 				cmtWithStatus,
 			},

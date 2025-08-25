@@ -29,6 +29,7 @@ var (
 	ErrInvalidBidAmt                = errors.New("invalid bid amount")
 	ErrInvalidSlashAmt              = errors.New("invalid slash amount")
 	ErrBidNotFound                  = errors.New("bid not found")
+	ErrMissingIdentity              = errors.New("missing identity")
 )
 
 var (
@@ -297,6 +298,20 @@ func computeBidStructHash(bid *preconfpb.Bid) (common.Hash, error) {
 		return common.Hash{}, ErrInvalidSlashAmt
 	}
 
+	var identityHash [32]byte
+	var err error
+	if bid.IsShutterised {
+		if bid.Identity == nil {
+			return common.Hash{}, ErrMissingIdentity
+		}
+		identityHash, err = toBytes32(bid.Identity)
+		if err != nil {
+			return common.Hash{}, err
+		}
+	} else {
+		identityHash = [32]byte{}
+	}
+
 	txnHashHash := crypto.Keccak256Hash([]byte(bid.TxHash))
 	revertingTxHashesHash := crypto.Keccak256Hash([]byte(bid.RevertingTxHashes))
 	bidderPK, err := p2pcrypto.BN254PublicKeyFromBytes(bid.NikePublicKey)
@@ -314,6 +329,8 @@ func computeBidStructHash(bid *preconfpb.Bid) (common.Hash, error) {
 		{Name: "slashAmt", Type: "uint256"},
 		{Name: "bidderPKx", Type: "uint256"},
 		{Name: "bidderPKy", Type: "uint256"},
+		{Name: "identity", Type: "bytes32"},
+		{Name: "isShutterised", Type: "bool"},
 	})
 	if err != nil {
 		return common.Hash{}, err
@@ -331,6 +348,8 @@ func computeBidStructHash(bid *preconfpb.Bid) (common.Hash, error) {
 		{Name: "slashAmt", Type: *bidStructType.TupleElems[7]},
 		{Name: "bidderPKx", Type: *bidStructType.TupleElems[8]},
 		{Name: "bidderPKy", Type: *bidStructType.TupleElems[9]},
+		{Name: "identity", Type: *bidStructType.TupleElems[10]},
+		{Name: "isShutterised", Type: *bidStructType.TupleElems[11]},
 	}
 
 	pkXBigInt, pkYBigInt := p2pcrypto.AffineToBigIntXY(bidderPK)
@@ -347,6 +366,8 @@ func computeBidStructHash(bid *preconfpb.Bid) (common.Hash, error) {
 		slashAmt,
 		&pkXBigInt,
 		&pkYBigInt,
+		identityHash,
+		bid.IsShutterised,
 	)
 	if err != nil {
 		return common.Hash{}, err

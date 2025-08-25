@@ -131,6 +131,8 @@ func (s *Service) ProcessBid(
 		DecayEndTimestamp:   bid.DecayEndTimestamp,
 		RevertingTxHashes:   revertingTxnHashes,
 		RawTransactions:     bid.RawTransactions,
+		Identity:            bid.Identity,
+		IsShutterised:       bid.IsShutterised,
 	}
 
 	err := s.validator.Validate(bidMsg)
@@ -560,6 +562,8 @@ func (s *Service) GetCommitmentInfo(
 			Details:             c.Details,
 			Payment:             c.Payment,
 			Refund:              c.Refund,
+			Identity:            c.Bid.Identity,
+			IsShutterised:       c.Bid.IsShutterised,
 		})
 	}
 

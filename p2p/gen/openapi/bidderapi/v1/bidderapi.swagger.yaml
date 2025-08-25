@@ -301,6 +301,13 @@ definitions:
         type: string
         description: Amount of ETH that will be slashed from the provider if they fail to include the transaction. If zero, the decayed bid amount is used for slashing.
         pattern: '[0-9]+'
+      identity:
+        type: string
+        format: byte
+        description: Identity of the encrypted shutterised transaction.
+      isShutterised:
+        type: boolean
+        description: Indicates if the bid is shutterised.
       commitments:
         type: array
         items:
@@ -414,6 +421,13 @@ definitions:
         type: string
         description: Amount of ETH that will be slashed from the provider if they fail to include the transaction. If zero, the decayed bid amount is used for slashing.
         pattern: '[0-9]+'
+      identity:
+        type: string
+        format: byte
+        description: Identity of the encrypted shutterised transaction.
+      isShutterised:
+        type: boolean
+        description: Indicates if the bidder is shutterised.
     description: Unsigned bid message from bidders to the bidder mev-commit node.
     title: Bid message
     required:
@@ -472,6 +486,13 @@ definitions:
       slashAmount:
         type: string
         description: Amount of ETH that will be slashed from the provider if they fail to include the transaction.
+      identity:
+        type: string
+        format: byte
+        description: Identity of the encrypted shutterised transaction.
+      isShutterised:
+        type: boolean
+        description: Indicates if the commitment is shutterised.
     description: Commitment message from the provider to the bidder mev-commit node.
     title: Commitment message
   googlerpcStatus:

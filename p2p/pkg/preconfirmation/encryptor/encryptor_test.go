@@ -87,6 +87,94 @@ func TestBids(t *testing.T) {
 		assert.Equal(t, address, *bidAddress)
 		assert.Equal(t, key.PublicKey, *pubkey)
 	})
+
+	t.Run("shutterisedBid", func(t *testing.T) {
+		key, err := crypto.GenerateKey()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		address := crypto.PubkeyToAddress(key.PublicKey)
+		keySigner := mockkeysigner.NewMockKeySigner(key, address)
+		aesKey, err := p2pcrypto.GenerateAESKey()
+		if err != nil {
+			t.Fatal(err)
+		}
+		bidderStore := keysstore.New(inmemstorage.New())
+		err = bidderStore.SetAESKey(address, aesKey)
+		if err != nil {
+			t.Fatal(err)
+		}
+		encryptor, err := preconfencryptor.NewEncryptor(keySigner, bidderStore, big.NewInt(31337), "0xA4AD4f68d0b91CFD19687c881e50f3A00242828c")
+		if err != nil {
+			t.Fatal(err)
+		}
+		start := time.Now().UnixMilli()
+		end := start + 100000
+
+		// Test case 1: IsShutterised = true but no identity (should fail)
+		reqBidNoIdentity := &preconfpb.Bid{
+			TxHash:              "0xpunit",
+			BidAmount:           "10",
+			SlashAmount:         "0",
+			BlockNumber:         2,
+			DecayStartTimestamp: start,
+			DecayEndTimestamp:   end,
+			IsShutterised:       true,
+			// Identity is nil - this should cause an error
+		}
+		_, _, err = encryptor.ConstructEncryptedBid(reqBidNoIdentity)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "missing identity")
+
+		// Test case 2: IsShutterised = true with identity of wrong length (should fail)
+		reqBidWrongLength := &preconfpb.Bid{
+			TxHash:              "0xpunit",
+			BidAmount:           "10",
+			SlashAmount:         "0",
+			BlockNumber:         2,
+			DecayStartTimestamp: start,
+			DecayEndTimestamp:   end,
+			IsShutterised:       true,
+			Identity:            []byte("wrong-length-identity"), // 25 bytes, not 32
+		}
+		_, _, err = encryptor.ConstructEncryptedBid(reqBidWrongLength)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "invalid length: expected 32 bytes")
+
+		// Test case 3: IsShutterised = true with correct 32-byte identity (should succeed)
+		correctIdentity := make([]byte, 32)
+		copy(correctIdentity, []byte("correct-32-byte-identity-here"))
+		reqBidCorrect := &preconfpb.Bid{
+			TxHash:              "0xpunit",
+			BidAmount:           "10",
+			SlashAmount:         "0",
+			BlockNumber:         2,
+			DecayStartTimestamp: start,
+			DecayEndTimestamp:   end,
+			IsShutterised:       true,
+			Identity:            correctIdentity, // Exactly 32 bytes
+		}
+		encryptedBid, _, err := encryptor.ConstructEncryptedBid(reqBidCorrect)
+		assert.NoError(t, err)
+		assert.NotNil(t, encryptedBid)
+
+		// Test case 4: IsShutterised = false with no identity (should succeed)
+		reqBidNotShutterised := &preconfpb.Bid{
+			TxHash:              "0xpunit",
+			BidAmount:           "10",
+			SlashAmount:         "0",
+			BlockNumber:         2,
+			DecayStartTimestamp: start,
+			DecayEndTimestamp:   end,
+			IsShutterised:       false,
+			// Identity is nil - this should be fine when not shutterised
+		}
+		encryptedBidNotShutterised, _, err := encryptor.ConstructEncryptedBid(reqBidNotShutterised)
+		assert.NoError(t, err)
+		assert.NotNil(t, encryptedBidNotShutterised)
+	})
+
 	t.Run("preConfirmation", func(t *testing.T) {
 		bidderKey, err := crypto.GenerateKey()
 		if err != nil {

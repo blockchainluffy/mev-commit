@@ -364,6 +364,12 @@ message Bid {
       message: "slash_amount must be a valid integer.",
       expression: "this == '' || (this.matches('^[0-9]+$') && uint(this) >= 0)"
   }];
+  bytes identity = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Identity of the encrypted shutterised transaction."
+  }];
+  bool is_shutterised = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if the bidder is shutterised."
+  }];
 };
 
 message Commitment {
@@ -412,6 +418,12 @@ message Commitment {
   }];
   string slash_amount = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
     description: "Amount of ETH that will be slashed from the provider if they fail to include the transaction."
+  }];
+  bytes identity = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Identity of the encrypted shutterised transaction."
+  }];
+  bool is_shutterised = 15 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if the commitment is shutterised."
   }];
 };
 
@@ -483,7 +495,13 @@ message GetBidInfoResponse {
       description: "Amount of ETH that will be slashed from the provider if they fail to include the transaction. If zero, the decayed bid amount is used for slashing."
       pattern: "[0-9]+"
     }];
-    repeated CommitmentWithStatus commitments = 9;
+    bytes identity = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Identity of the encrypted shutterised transaction."
+    }];
+    bool is_shutterised = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Indicates if the bid is shutterised."
+    }];
+    repeated CommitmentWithStatus commitments = 11;
   };
   message BlockBidInfo {
     int64 block_number = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
