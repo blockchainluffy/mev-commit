@@ -2,19 +2,21 @@
 
 # Default binary path and root path for mev-commit.
 ROOT_PATH="${HOME}/.mev-commit"
-BINARY_PATH="${ROOT_PATH}/mev-commit"
+# BINARY_PATH="${ROOT_PATH}/mev-commit"
+BINARY_PATH="./p2p/bin/mev-commit"
 
 # Default mev-commit configuration values.
 NODE_TYPE="bidder"
-DOMAIN="mev-commit.xyz"
-RPC_URL="wss://chainrpc-wss.${DOMAIN}"
+DOMAIN="testnet.mev-commit.xyz"
+RPC_URL="https://chainrpc.testnet.mev-commit.xyz"
+# RPC_URL="wss://chainrpc-wss.${DOMAIN}"
 FAUCET_URL="https://faucet.${DOMAIN}"
 BOOTNODE="/dnsaddr/bootnode.${DOMAIN}"
 CONTRACTS_URL="https://contracts.${DOMAIN}"
 OTEL_COLLECTOR_ENDPOINT_URL=""
 SERVICE_NAME=""
 NAT_ADDR=""
-NAT_PORT=""
+NAT_PORT="8521"
 AUTO_DEPOSIT_AMOUNT="300000000000"
 
 # Default mev-commit binary download values.
@@ -288,7 +290,7 @@ main() {
   chmod +x ${BINARY_PATH}
   log_info "Initializing mev-commit..."
   local flags=(
-    --settlement-ws-rpc-endpoint "${RPC_URL}"
+    --settlement-rpc-endpoint "${RPC_URL}"
     --peer-type "${NODE_TYPE}"
     --bootnodes "${BOOTNODE}"
   )

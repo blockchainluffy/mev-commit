@@ -91,8 +91,8 @@ var defaultL1URLs = map[string]L1URLs{
 		BeaconAPIURL: "https://ethereum-beacon-api.publicnode.com",
 	},
 	contracts.TestnetChainID.String(): L1URLs{
-		L1RPCURL:     "https://ethereum-holesky-rpc.publicnode.com",
-		BeaconAPIURL: "https://ethereum-holesky-beacon-api.publicnode.com",
+		L1RPCURL:     "https://ethereum-hoodi-rpc.publicnode.com",
+		BeaconAPIURL: "https://ethereum-hoodi-beacon-api.publicnode.com",
 	},
 }
 
@@ -153,6 +153,10 @@ func NewNode(opts *Options) (*Node, error) {
 		contractRPC *ethclient.Client
 		err         error
 	)
+
+	fmt.Println("opts.WSRPCEndpoint", opts.WSRPCEndpoint)
+	fmt.Println("opts.RPCEndpoint", opts.RPCEndpoint)
+	println("--------------------------------")
 	if opts.WSRPCEndpoint != "" {
 		contractRPC, err = ethclient.Dial(opts.WSRPCEndpoint)
 		if err != nil {
@@ -174,6 +178,9 @@ func NewNode(opts *Options) (*Node, error) {
 		opts.Logger.Error("failed to get chain ID", "error", err)
 		return nil, err
 	}
+
+	fmt.Println("chainID", chainID)
+	println("--------------------------------")
 
 	if defaults, ok := contracts.DefaultsContracts[chainID.String()]; ok {
 		setDefault(&opts.PreconfContract, defaults.PreconfManager)
@@ -511,6 +518,8 @@ func NewNode(opts *Options) (*Node, error) {
 			return nil, err
 		}
 
+		fmt.Println("opts.L1RPCURL", opts.L1RPCURL)
+		println("--------------------------------")
 		l1ContractRPC, err := ethclient.Dial(opts.L1RPCURL)
 		if err != nil {
 			opts.Logger.Error("failed to connect to rpc", "error", err)
