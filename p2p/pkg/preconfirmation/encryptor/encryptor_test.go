@@ -136,15 +136,15 @@ func TestBids(t *testing.T) {
 			DecayStartTimestamp: start,
 			DecayEndTimestamp:   end,
 			IsShutterised:       true,
-			Identity:            []byte("wrong-length-identity"), // 25 bytes, not 32
+			Identity:            "wrong-length-identity", // 25 bytes, not 32
 		}
 		_, _, err = encryptor.ConstructEncryptedBid(reqBidWrongLength)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "invalid length: expected 32 bytes")
+		println("err", err)
+		assert.Contains(t, err.Error(), "missing identity")
 
 		// Test case 3: IsShutterised = true with correct 32-byte identity (should succeed)
-		correctIdentity := make([]byte, 32)
-		copy(correctIdentity, []byte("correct-32-byte-identity-here"))
+		correctIdentity := "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 		reqBidCorrect := &preconfpb.Bid{
 			TxHash:              "0xpunit",
 			BidAmount:           "10",
@@ -153,7 +153,7 @@ func TestBids(t *testing.T) {
 			DecayStartTimestamp: start,
 			DecayEndTimestamp:   end,
 			IsShutterised:       true,
-			Identity:            correctIdentity, // Exactly 32 bytes
+			Identity:            correctIdentity,
 		}
 		encryptedBid, _, err := encryptor.ConstructEncryptedBid(reqBidCorrect)
 		assert.NoError(t, err)

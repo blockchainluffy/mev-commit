@@ -298,18 +298,15 @@ func computeBidStructHash(bid *preconfpb.Bid) (common.Hash, error) {
 		return common.Hash{}, ErrInvalidSlashAmt
 	}
 
-	var identityHash [32]byte
+	var identityHash common.Hash
 	var err error
 	if bid.IsShutterised {
-		if bid.Identity == nil {
+		if bid.Identity == "" || len(bid.Identity) != 64 {
 			return common.Hash{}, ErrMissingIdentity
 		}
-		identityHash, err = toBytes32(bid.Identity)
-		if err != nil {
-			return common.Hash{}, err
-		}
+		identityHash = crypto.Keccak256Hash([]byte(bid.Identity))
 	} else {
-		identityHash = [32]byte{}
+		identityHash = common.Hash{}
 	}
 
 	txnHashHash := crypto.Keccak256Hash([]byte(bid.TxHash))

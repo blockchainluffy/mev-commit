@@ -230,7 +230,7 @@ message Bid {
       message: "slash_amount must be a valid integer.",
       expression: "this == '' || (this.matches('^[0-9]+$') && uint(this) >= 0)"
   }];
-  bytes identity = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+  repeated string identity = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
     description: "Identity of the encrypted shutterised transaction."
   }];
   bool is_shutterised = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
@@ -338,7 +338,7 @@ message CommitmentInfoResponse {
     string refund = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
       description: "Refund amount in wei for the commitment, if applicable."
     }];
-    bytes identity = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    repeated string identity = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
       description: "Identity of the encrypted shutterised transaction."
     }];
     bool is_shutterised = 15 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {

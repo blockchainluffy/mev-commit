@@ -131,7 +131,7 @@ func (s *Service) ProcessBid(
 		DecayEndTimestamp:   bid.DecayEndTimestamp,
 		RevertingTxHashes:   revertingTxnHashes,
 		RawTransactions:     bid.RawTransactions,
-		Identity:            bid.Identity,
+		Identity:            strings.Split(bid.Identity, ","),
 		IsShutterised:       bid.IsShutterised,
 	}
 
@@ -562,7 +562,7 @@ func (s *Service) GetCommitmentInfo(
 			Details:             c.Details,
 			Payment:             c.Payment,
 			Refund:              c.Refund,
-			Identity:            c.Bid.Identity,
+			Identity:            strings.Split(c.Bid.Identity, ","),
 			IsShutterised:       c.Bid.IsShutterised,
 		})
 	}
