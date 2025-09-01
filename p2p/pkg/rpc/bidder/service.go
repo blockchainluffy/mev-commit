@@ -176,15 +176,26 @@ func (s *Service) SendBid(
 				s.logger.Error("decoding raw transaction", "error", err)
 				return status.Errorf(codes.InvalidArgument, "decoding raw transaction: %v", err)
 			}
-			txnObj := new(types.Transaction)
-			err = txnObj.UnmarshalBinary(rawTxnBytes)
-			if err != nil {
-				s.logger.Error("unmarshaling raw transaction", "error", err)
-				return status.Errorf(codes.InvalidArgument, "unmarshaling raw transaction: %v", err)
-			}
-			strBuilder.WriteString(strings.TrimPrefix(txnObj.Hash().Hex(), "0x"))
-			if i != len(bid.RawTransactions)-1 {
-				strBuilder.WriteString(",")
+			if !bid.IsShutterised {
+				txnObj := new(types.Transaction)
+				err = txnObj.UnmarshalBinary(rawTxnBytes)
+				if err != nil {
+					s.logger.Error("unmarshaling raw transaction", "error", err)
+					return status.Errorf(codes.InvalidArgument, "unmarshaling raw transaction: %v", err)
+				}
+				strBuilder.WriteString(strings.TrimPrefix(txnObj.Hash().Hex(), "0x"))
+				if i != len(bid.RawTransactions)-1 {
+					strBuilder.WriteString(",")
+				}
+			} else {
+				if bid.Identity[i] == "" {
+					s.logger.Error("identity is nil", "bid", bid)
+					return status.Errorf(codes.InvalidArgument, "identity is nil")
+				}
+				strBuilder.WriteString(strings.TrimPrefix(bid.Identity[i], "0x"))
+				if i != len(bid.RawTransactions)-1 {
+					strBuilder.WriteString(",")
+				}
 			}
 		}
 		txnsStr = strBuilder.String()
@@ -205,7 +216,7 @@ func (s *Service) SendBid(
 			DecayEndTimestamp:   bid.DecayEndTimestamp,
 			RevertingTxHashes:   strings.Join(stripPrefix(bid.RevertingTxHashes), ","),
 			RawTransactions:     bid.RawTransactions,
-			Identity:            bid.Identity,
+			Identity:            txnsStr,
 			IsShutterised:       bid.IsShutterised,
 		},
 	)
@@ -230,7 +241,7 @@ func (s *Service) SendBid(
 			DecayEndTimestamp:    b.DecayEndTimestamp,
 			DispatchTimestamp:    resp.DispatchTimestamp,
 			RevertingTxHashes:    strings.Split(b.RevertingTxHashes, ","),
-			Identity:             b.Identity,
+			Identity:             strings.Split(b.Identity, ","),
 			IsShutterised:        b.IsShutterised,
 		})
 		if err != nil {
@@ -804,7 +815,7 @@ LOOP:
 			SlashAmount:         c.Bid.SlashAmount,
 			DecayStartTimestamp: c.Bid.DecayStartTimestamp,
 			DecayEndTimestamp:   c.Bid.DecayEndTimestamp,
-			Identity:            c.Bid.Identity,
+			Identity:            strings.Split(c.Bid.Identity, ","),
 			IsShutterised:       c.Bid.IsShutterised,
 			Commitments: []*bidderapiv1.GetBidInfoResponse_CommitmentWithStatus{
 				cmtWithStatus,
